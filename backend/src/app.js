@@ -2,9 +2,9 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
-const authRouter = require("./routes/auth.routes");
-const urlRouter = require("./routes/url.routes");
-const redirectRouter = require("./routes/redirect.routes");
+// const authRouter = require("./routes/auth.routes");
+// const urlRouter = require("./routes/url.routes");
+// const redirectRouter = require("./routes/redirect.routes");
 
 const app = express();
 
@@ -47,9 +47,9 @@ app.get("/health", (req, res) => {
         timestamp: new Date().toISOString(),
     });
 });
-app.use("/auth", authRouter);
-app.use("/url", urlRouter);
-// Public Redirect Route
-app.use("/", redirectRouter);
+// app.use("/auth", authRouter);
+// app.use("/url", urlRouter);
+// // Public Redirect Route
+// app.use("/", redirectRouter);
 
 module.exports = app;
