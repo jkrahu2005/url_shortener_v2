@@ -14,9 +14,9 @@ async function initialize() {
 
   await connect();
 
-  if (!redisClient.isOpen) {
-    await redisClient.connect();
-  }
+  // if (!redisClient.isOpen) {
+  //   await redisClient.connect();
+  // }
 
   initialized = true;
 }
