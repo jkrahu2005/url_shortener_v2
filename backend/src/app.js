@@ -1,36 +1,55 @@
-console.log("1");
-
 const express = require("express");
-console.log("2");
-
 const cors = require("cors");
-console.log("3");
-
 const cookieParser = require("cookie-parser");
-console.log("4");
 
-console.log("Loading auth...");
 const authRouter = require("./routes/auth.routes");
-console.log("Auth loaded");
-
-console.log("Loading url...");
 const urlRouter = require("./routes/url.routes");
-console.log("URL loaded");
-
-console.log("Loading redirect...");
 const redirectRouter = require("./routes/redirect.routes");
-console.log("Redirect loaded");
 
 const app = express();
-console.log("App created");
 
 app.use(express.json());
 app.use(cookieParser());
 
-app.get("/", (req, res) => {
-    res.send("Backend Running");
-});
+const allowedOrigins = [
+    "http://localhost:5173",
+    process.env.FRONTEND_URL,
+];
 
-console.log("Exporting app");
+app.use(
+    cors({
+        origin(origin, callback) {
+            // Allow Postman / curl
+            if (!origin) {
+                return callback(null, true);
+            }
+
+            if (allowedOrigins.includes(origin)) {
+                return callback(null, true);
+            }
+
+            return callback(
+                new Error("Not allowed by CORS")
+            );
+        },
+        credentials: true,
+    })
+);
+
+app.get("/", (req, res) => {
+    res.send("Backend Running 🚀");
+});
+app.get("/health", (req, res) => {
+    res.status(200).json({
+        success: true,
+        status: "OK",
+        message: "Server is healthy",
+        timestamp: new Date().toISOString(),
+    });
+});
+app.use("/auth", authRouter);
+app.use("/url", urlRouter);
+// Public Redirect Route
+app.use("/", redirectRouter);
 
 module.exports = app;
