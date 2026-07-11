@@ -243,11 +243,49 @@ async function getCurrentUser(req, res) {
         });
     }
 }
+/**
+ * Google OAuth Callback Controller
+ */
+async function googleCallback(req, res) {
+    try {
+        // Passport attaches the user profile to req.user
+        const profile = req.user;
+
+        const {
+            user,
+            accessToken,
+            refreshToken,
+        } = await authService.googleLogin(profile);
+
+        // Set Access Token Cookie
+        res.cookie(
+            "accessToken",
+            accessToken,
+            accessTokenCookieOptions
+        );
+
+        // Set Refresh Token Cookie
+        res.cookie(
+            "refreshToken",
+            refreshToken,
+            refreshTokenCookieOptions
+        );
+
+        // Redirect to frontend homepage
+        return res.redirect(process.env.FRONTEND_URL || "http://localhost:5173");
+
+    } catch (err) {
+        console.error("Google Callback Controller Error:", err.message);
+        // Redirect to login page with error
+        return res.redirect(`${process.env.FRONTEND_URL}/login?error=google_auth_failed`);
+    }
+}
 
 module.exports = {
     register,
     login,
     refresh,
     logout,
-    getCurrentUser
+    getCurrentUser,
+    googleCallback,   // ✅ NEW
 };

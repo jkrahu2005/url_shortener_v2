@@ -237,10 +237,52 @@ async function logout(accessToken, refreshToken) {
         throw err;
     }
 }
+/**
+ * Google Login (Find or Create user)
+ */
+async function googleLogin(profile) {
+    try {
+        const email = profile.emails[0].value;
+        const googleId = profile.id;
+        const fullName = profile.displayName;
+
+        // 1. Try to find user by Google ID
+        let user = await userModel.findUserByGoogleId(googleId);
+
+        // 2. If not found by Google ID, check by email
+        if (!user) {
+            user = await userModel.findUserByEmail(email);
+
+            if (user) {
+                // 3. User exists with this email but no Google ID → Link them
+                await userModel.updateUserGoogleId(user.id, googleId);
+                // Fetch the updated user
+                user = await userModel.findUserById(user.id);
+            } else {
+                // 4. Brand new user → Create with Google
+                user = await userModel.createUserWithGoogle(fullName, email, googleId);
+            }
+        }
+
+        // 5. Issue tokens (same as regular login)
+        const { accessToken, refreshToken } = await issueTokens(user);
+
+        return {
+            user,
+            accessToken,
+            refreshToken,
+        };
+
+    } catch (err) {
+        console.error("Google Login Service Error:", err.message);
+        throw err;
+    }
+}
 
 module.exports = {
     register,
     login,
     refresh,
-    logout
+    logout,
+    googleLogin,   // ✅ NEW
 };
